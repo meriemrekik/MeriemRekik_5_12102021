@@ -1,6 +1,6 @@
 
 //recuperer tt les donnée du canapé depuis l'api
-// import * as config from "./config";
+//mport urlApi from "./config.js";
 const urlApi = "http://localhost:3000/api";
 let getAllCapane = () => {
     fetch(urlApi + "/products/")
