@@ -1,16 +1,25 @@
-const urlApi = "http://localhost:3000/api";
 
 let panier = [];
-
-if (localStorage.getItem("panier")) {
-    panier = JSON.parse(localStorage.getItem("panier"));
+let sectionElement = null;
+let listeInfosCanape = [];
+let totalePricePanier = 0;
+let totaleQuantitePanier = 0;
+// Infos à envoyer pour créer un bon de commande
+let data = {
+    contact: {
+        firstName: "",
+        lastName: "",
+        address: "",
+        city: "",
+        email: "",
+    },
+    products: []
 }
-console.table(panier);
+let bouttonCommander = null;
+let form = null;
 
 
-let sectionElement = document.getElementById("cart__items");
-
-let afficheCanapeDansPanier = (infosCanape, indexPanier) => {
+let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
     let articleElement = document.createElement("article");
     articleElement.className = "cart__item";
     articleElement.setAttribute("data-id", infosCanape._id + "-" + panier[indexPanier].colors);
@@ -64,7 +73,8 @@ let afficheCanapeDansPanier = (infosCanape, indexPanier) => {
     inputElement.max = 100;
     inputElement.value = panier[indexPanier].quantity;
     inputElement.addEventListener("change", () => {
-        panier[indexPanier].quantity = parseInt(inputElement.value);
+        const indexToChange = [...sectionElement.children].indexOf(articleElement);
+        panier[indexToChange].quantity = parseInt(inputElement.value);
         calculeMonPanier();
         savePanier();
     });
@@ -79,19 +89,20 @@ let afficheCanapeDansPanier = (infosCanape, indexPanier) => {
     deleteContainerElement.appendChild(deleteElementQuantity);
 
     deleteElementQuantity.addEventListener("click", () => {
-        let aSupprimer = document.querySelector('article[data-id="' + infosCanape._id + '-' + panier[indexPanier].colors + '"]');
-        console.log(aSupprimer);
+        const indexToDelete = [...sectionElement.children].indexOf(articleElement);
+        console.log(indexToDelete);
+        let aSupprimer = deleteElementQuantity.closest('article');
         aSupprimer.remove();
-        panier.splice(indexPanier, 1);
-        listeInfosCanape.splice(indexPanier, 1);
-        savePanier();
+        panier.splice(indexToDelete, 1);
+        listeInfosCanape.splice(indexToDelete, 1);
+        savePanier(panier);
         calculeMonPanier();
     });
 }
 
 // Fonction permettant de récupere les infos d'un canapé par son id
 let getCanape = (idCanape) => {
-    return fetch(urlApi + "/products/" + idCanape)
+    return fetch(URL_API + "/products/" + idCanape)
         .then(function (res) {
             if (res.ok) {
                 return res.json();
@@ -106,10 +117,6 @@ let getCanape = (idCanape) => {
 }
 
 
-let listeInfosCanape = [];
-let totalePricePanier = 0;
-let totaleQuantitePanier = 0;
-
 let afficherTotalePanier = (price, quantity) => {
     let totalPriceElement = document.getElementById("totalPrice");
     totalPriceElement.innerText = price.toFixed(2);
@@ -122,9 +129,8 @@ let afficherToutMonPanier = async () => {
     for (let i = 0; i < panier.length; i++) {
         let infoCanape = null;
         await getCanape(panier[i].id).then((res) => infoCanape = res);
-        console.log(infoCanape);
         listeInfosCanape.push(infoCanape);
-        afficheCanapeDansPanier(infoCanape, i);
+        ajouteCanapeDansPanier(infoCanape, i);
     }
     calculeMonPanier();
 }
@@ -140,52 +146,61 @@ let calculeMonPanier = () => {
 }
 
 
-afficherToutMonPanier();
-
-let savePanier = () => {
-    localStorage.setItem("panier", JSON.stringify(panier));
-}
-
-
-
-// Infos à envoyer pour créer un bon de commande
-let data = {
-    contact: {
-        firstName: "",
-        lastName: "",
-        address: "",
-        city: "",
-        email: "",
-    },
-    products: []
-}
-
-const bouttonCommander = document.getElementById('order');
-
 // Fonction qui vérifie si les infos du formulaire sont bonnes
 let verifInfos = () => {
     let emailErrorMsg = document.getElementById('emailErrorMsg');
     if (!VerifFormulaire.validateEmail(data.contact.email)) {
-
+        emailErrorMsg.innerText = "Votre email n'est pas valide !";
+        return false;
     } else {
-
+        emailErrorMsg.innerText = "";
     }
 
     let firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
-    if (!VerifFormulaire.contientUniquementDesLettres(data.contact.firstName)) {
-
+    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.firstName)) {
+        firstNameErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
+        return false;
+    } else {
+        firstNameErrorMsg.innerText = "";
     }
+
+    let lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
+    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.lastName)) {
+        lastNameErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
+        return false;
+    } else {
+        lastNameErrorMsg.innerText = "";
+    }
+
+    let addressErrorMsg = document.getElementById('addressErrorMsg');
+    if (!VerifFormulaire.contientUniquementDesLettresEspacesChiffres(data.contact.address)) {
+        addressErrorMsg.innerText = "Ce champ ne peut contenir que des lettres et des chiffres";
+        return false;
+    } else {
+        addressErrorMsg.innerText = "";
+    }
+
+    let cityErrorMsg = document.getElementById('cityErrorMsg');
+    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.city)) {
+        cityErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
+        return false;
+    } else {
+        cityErrorMsg.innerText = "";
+    }
+
+    return true;
 }
 
 // Fonction qui permet de récupérer les infos venant du formulaire
 let getInfos = function (e) {
     // on empeche le formulaire d'être envoyé
     e.preventDefault();
-    data.contact.firstName = document.getElementById('firstName').value;
-    data.contact.lastName = document.getElementById('lastName').value;
-    data.contact.address = document.getElementById('address').value;
-    data.contact.city = document.getElementById('city').value;
-    data.contact.email = document.getElementById('email').value;
+    data.contact.firstName = document.getElementById('firstName').value.trim();
+    data.contact.lastName = document.getElementById('lastName').value.trim();
+    data.contact.address = document.getElementById('address').value.trim();
+    data.contact.city = document.getElementById('city').value.trim();
+    data.contact.email = document.getElementById('email').value.trim();
+
     // On parcours le panier
     for (let p of panier) {
         // pour chaque element dans le panier on rajoute l'id selon la quantité
@@ -193,30 +208,44 @@ let getInfos = function (e) {
             data.products.push(p.id);
         }
     }
-    console.log(data);
-}
 
-// on récpère le formulaire du html
-let form = document.querySelector(".cart__order__form");
-// lorsque le formulaire est soumi on utilise la fonction getInfos
-form.setAttribute('onsubmit', "return getInfos(event)");
+    const formEstValide = verifInfos();
 
-// on crée cette class avec pleins de fonctions pour tester les valeurs dans notre formulaire
-class VerifFormulaire {
-    static contientUniquementDesLettres(inputtxt) {
-        var letters = /^[A-Za-z]+$/;
-        if (inputtxt.value.match(letters)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    static validateEmail(mail) {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
-            return true;
-        }
-        return false;
+    if (formEstValide) {
+        createOrder(data);
     }
 }
+
+
+
+function createOrder(data) {
+    fetch(URL_API + '/products/order', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    }).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        panier = [];
+        savePanier(panier);
+        document.location.href = "./confirmation.html?orderId=" + data.orderId;
+    });
+}
+
+let init = () => {
+    panier = getPanier();
+    sectionElement = document.getElementById("cart__items");
+
+    afficherToutMonPanier();
+
+    bouttonCommander = document.getElementById('order');
+    // on récpère le formulaire du html
+    form = document.querySelector(".cart__order__form");
+    // lorsque le formulaire est soumi on utilise la fonction getInfos
+    form.setAttribute('onsubmit', "return getInfos(event)");
+}
+
+init();

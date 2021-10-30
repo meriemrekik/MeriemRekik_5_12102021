@@ -1,27 +1,14 @@
-const urlApi = "http://localhost:3000/api";
+let id = "";
+let buttonAdd = null;
+let quantityElement = null;
+let colorsElement = null;
+let panier = [];
 
-//recupérer l'id du canapé ^résent dans url de la page
-let getIdFromUrl = () => {
-    //permet de récupérer l'url de la page
-    let url = new URL(document.location.href);
-    //permet de recuperer les paramétres présent dans url
-    let search_params = new URLSearchParams(url.search);
-    // si on a un paramétre id dans url
-    if (search_params.has('id')) {
-        //on récupére paramétre id et le retourne
-        let id = search_params.get('id');
-        console.log(id);
-        return id;
-    }
-    //si on pas de paramétre id il retourne null
-    return null;
-}
 
-const id = getIdFromUrl();
 
 //on récupére les donnés du canapé à partir de l'id
 let getCanape = (idCanape) => {
-    fetch(urlApi + "/products/" + idCanape)
+    fetch(URL_API + "/products/" + idCanape)
         .then(function (res) {
             if (res.ok) {
                 return res.json();
@@ -36,7 +23,6 @@ let getCanape = (idCanape) => {
 
 }
 
-getCanape(id);
 
 let afficheCanape = (myProduct) => {
 
@@ -65,16 +51,9 @@ let afficheCanape = (myProduct) => {
         selectElement.appendChild(optionElement);
     }
 
-}
+    let quantityElement = document.getElementById('quantity');
+    quantityElement.value = 1;
 
-//ajout au panier
-let buttonAdd = document.getElementById("addToCart");
-let quantityElement = document.getElementById("quantity");
-let colorsElement = document.getElementById("colors");
-
-let panier = [];
-if (localStorage.getItem("panier")) {
-    panier = JSON.parse(localStorage.getItem("panier"));
 }
 
 
@@ -96,21 +75,34 @@ let addPanier = () => {
         );
     }
 
-    console.log(panier);
-    localStorage.setItem("panier", JSON.stringify(panier));
-
+    // on sauvegarde dans le localStorage
+    savePanier(panier);
+    document.location.href = "./cart.html";
 }
-buttonAdd.addEventListener('click', function () {          // On écoute l'événement click
-    if (quantityElement.value == 0) {
-        alert("Vous devez modifier la quantité");
-    }
-    else if (colorsElement.value == "") {
-        alert("Vous devez choisir une color")
-
-    }
-    else {
-        addPanier();
-    }
 
 
-});
+let init = () => {
+
+    id = getParamFromUrl('id');
+    getCanape(id);
+
+    //ajout au panier
+    buttonAdd = document.getElementById("addToCart");
+    quantityElement = document.getElementById("quantity");
+    colorsElement = document.getElementById("colors");
+
+    panier = getPanier();
+
+    // On écoute l'événement click
+    buttonAdd.addEventListener('click', function () {
+        if (quantityElement.value == 0) {
+            alert("Vous devez modifier la quantité");
+        } else if (colorsElement.value == "") {
+            alert("Vous devez choisir une color");
+        } else {
+            addPanier();
+        }
+    });
+}
+
+init();
