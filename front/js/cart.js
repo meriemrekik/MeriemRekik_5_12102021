@@ -217,8 +217,11 @@ let getInfos = function (e) {
 
     const formEstValide = verifInfos();
 
-    if (formEstValide) {
+    if (formEstValide && panier.length > 0) {
         createOrder(data);
+    }
+    else {
+        alert("Votre panier est vide. ");
     }
 }
 
