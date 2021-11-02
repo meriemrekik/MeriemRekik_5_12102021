@@ -1,6 +1,7 @@
 
 let panier = [];
 let sectionElement = null;
+//un tableau qui contiendra toute les informations de chaque canapé présent dans panier
 let listeInfosCanape = [];
 let totalePricePanier = 0;
 let totaleQuantitePanier = 0;
@@ -72,6 +73,8 @@ let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
     inputElement.min = 1;
     inputElement.max = 100;
     inputElement.value = panier[indexPanier].quantity;
+
+    // au changement de la valeur dans l'input on change la valeur dans panier
     inputElement.addEventListener("change", () => {
         const indexToChange = [...sectionElement.children].indexOf(articleElement);
         panier[indexToChange].quantity = parseInt(inputElement.value);
@@ -79,6 +82,7 @@ let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
         savePanier();
     });
     settingsElement.appendChild(inputElement);
+
     //comment je suprime la produit dans panier
     let deleteContainerElement = document.createElement("div");
     deleteContainerElement.className = "cart__item__content__settings__delete";
@@ -91,8 +95,10 @@ let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
     deleteElementQuantity.addEventListener("click", () => {
         const indexToDelete = [...sectionElement.children].indexOf(articleElement);
         console.log(indexToDelete);
-        let aSupprimer = deleteElementQuantity.closest('article');
-        aSupprimer.remove();
+        /* let aSupprimer = deleteElementQuantity.closest('article');
+        aSupprimer.remove();*/
+        articleElement.remove();
+
         panier.splice(indexToDelete, 1);
         listeInfosCanape.splice(indexToDelete, 1);
         savePanier(panier);
@@ -236,11 +242,14 @@ function createOrder(data) {
 }
 
 let init = () => {
+
+    //partie 1 on affiche les elements de notre panier
     panier = getPanier();
     sectionElement = document.getElementById("cart__items");
 
     afficherToutMonPanier();
 
+    //partie 2 on gére la création de notre commande 
     bouttonCommander = document.getElementById('order');
     // on récpère le formulaire du html
     form = document.querySelector(".cart__order__form");

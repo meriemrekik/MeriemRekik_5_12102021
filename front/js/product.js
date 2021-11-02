@@ -58,13 +58,17 @@ let afficheCanape = (myProduct) => {
 
 
 let addPanier = () => {
+    // on recherche la position dans le panier du produit si'il existe déja avec la meme couleur
     let find = panier.findIndex(
         c => c.id == id && c.colors == colorsElement.value);
+
+    //si il existe déja 
     if (find >= 0) {
+        //alors on met a jour la quantité
         panier[find].quantity += parseInt(quantityElement.value);
     }
     else {
-        //on ajoute le produit
+        // sinon on ajoute le produit dans cette couleur
         panier.push(
             {
                 "id": id,
@@ -83,9 +87,11 @@ let addPanier = () => {
 
 let init = () => {
 
+    //partie 1 pn affiche le canape
     id = getParamFromUrl('id');
     getCanape(id);
 
+    //partie 2 on gére la gestion du panier
     //ajout au panier
     buttonAdd = document.getElementById("addToCart");
     quantityElement = document.getElementById("quantity");
@@ -95,10 +101,8 @@ let init = () => {
 
     // On écoute l'événement click
     buttonAdd.addEventListener('click', function () {
-        if (quantityElement.value == 0) {
-            alert("Vous devez modifier la quantité");
-        } else if (colorsElement.value == "") {
-            alert("Vous devez choisir une color");
+        if (colorsElement.value == "") {
+            alert("Vous devez choisir une couleur");
         } else {
             addPanier();
         }
