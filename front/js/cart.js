@@ -19,7 +19,7 @@ let data = {
 let bouttonCommander = null;
 let form = null;
 
-
+//
 let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
     let articleElement = document.createElement("article");
     articleElement.className = "cart__item";
@@ -216,8 +216,11 @@ let getInfos = function (e) {
     }
 
     const formEstValide = verifInfos();
+    if (formEstValide == false) {
+        return false;
+    }
 
-    if (formEstValide && panier.length > 0) {
+    if (panier.length > 0) {
         createOrder(data);
     }
     else {
