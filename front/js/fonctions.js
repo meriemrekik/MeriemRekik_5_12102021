@@ -1,3 +1,4 @@
+// retourne les valeur d'un paramètre (param) si il est présent dans l'URL sinon retourne null 
 let getParamFromUrl = (param) => {
     //permet de récupérer l'url de la page
     let url = new URL(document.location.href);
@@ -61,6 +62,12 @@ class VerifFormulaire {
 }
 
 
-
+let desactiverFormulaire = () => {
+    document.getElementById('firstName').disabled = true;
+    document.getElementById('lastName').disabled = true;
+    document.getElementById('address').disabled = true;
+    document.getElementById('city').disabled = true;
+    document.getElementById('email').disabled = true;
+}
 
 

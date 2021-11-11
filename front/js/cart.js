@@ -6,21 +6,8 @@ let listeInfosCanape = [];
 let totalePricePanier = 0;
 let totaleQuantitePanier = 0;
 // Infos à envoyer pour créer un bon de commande
-let data = {
-    contact: {
-        firstName: "",
-        lastName: "",
-        address: "",
-        city: "",
-        email: "",
-    },
-    products: []
-}
-let bouttonCommander = null;
-let form = null;
 
-//
-let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
+let afficheCanapeDansPanier = (infosCanape, indexPanier) => {
     let articleElement = document.createElement("article");
     articleElement.className = "cart__item";
     articleElement.setAttribute("data-id", infosCanape._id + "-" + panier[indexPanier].colors);
@@ -94,9 +81,6 @@ let ajouteCanapeDansPanier = (infosCanape, indexPanier) => {
 
     deleteElementQuantity.addEventListener("click", () => {
         const indexToDelete = [...sectionElement.children].indexOf(articleElement);
-        console.log(indexToDelete);
-        /* let aSupprimer = deleteElementQuantity.closest('article');
-        aSupprimer.remove();*/
         articleElement.remove();
 
         panier.splice(indexToDelete, 1);
@@ -136,7 +120,7 @@ let afficherToutMonPanier = async () => {
         let infoCanape = null;
         await getCanape(panier[i].id).then((res) => infoCanape = res);
         listeInfosCanape.push(infoCanape);
-        ajouteCanapeDansPanier(infoCanape, i);
+        afficheCanapeDansPanier(infoCanape, i);
     }
     calculeMonPanier();
 }
@@ -145,122 +129,21 @@ let calculeMonPanier = () => {
     totalePricePanier = 0;
     totaleQuantitePanier = 0;
     for (let i = 0; i < panier.length; i++) {
-        totalePricePanier += listeInfosCanape[i].price * panier[i].quantity;
-        totaleQuantitePanier += panier[i].quantity;
+        totalePricePanier += listeInfosCanape[i].price * panier[i].quantity;// totalPrix = prix du canape * la quantité
+        totaleQuantitePanier += panier[i].quantity;// totalQuantite = totalQuantite + quantité du canapé
     }
     afficherTotalePanier(totalePricePanier, totaleQuantitePanier);
-}
-
-
-// Fonction qui vérifie si les infos du formulaire sont bonnes
-let verifInfos = () => {
-    let emailErrorMsg = document.getElementById('emailErrorMsg');
-    if (!VerifFormulaire.validateEmail(data.contact.email)) {
-        emailErrorMsg.innerText = "Votre email n'est pas valide !";
-        return false;
-    } else {
-        emailErrorMsg.innerText = "";
+    if (panier.length == 0) {
+        desactiverFormulaire();
     }
-
-    let firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
-    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.firstName)) {
-        firstNameErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
-        return false;
-    } else {
-        firstNameErrorMsg.innerText = "";
-    }
-
-    let lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
-    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.lastName)) {
-        lastNameErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
-        return false;
-    } else {
-        lastNameErrorMsg.innerText = "";
-    }
-
-    let addressErrorMsg = document.getElementById('addressErrorMsg');
-    if (!VerifFormulaire.contientUniquementDesLettresEspacesChiffres(data.contact.address)) {
-        addressErrorMsg.innerText = "Ce champ ne peut contenir que des lettres et des chiffres";
-        return false;
-    } else {
-        addressErrorMsg.innerText = "";
-    }
-
-    let cityErrorMsg = document.getElementById('cityErrorMsg');
-    if (!VerifFormulaire.contientUniquementDesLettresEspaces(data.contact.city)) {
-        cityErrorMsg.innerText = "Ce champ ne peut contenir que des lettres";
-        return false;
-    } else {
-        cityErrorMsg.innerText = "";
-    }
-
-    return true;
-}
-
-// Fonction qui permet de récupérer les infos venant du formulaire
-let getInfos = function (e) {
-    // on empeche le formulaire d'être envoyé
-    e.preventDefault();
-    data.contact.firstName = document.getElementById('firstName').value.trim();
-    data.contact.lastName = document.getElementById('lastName').value.trim();
-    data.contact.address = document.getElementById('address').value.trim();
-    data.contact.city = document.getElementById('city').value.trim();
-    data.contact.email = document.getElementById('email').value.trim();
-
-    // On parcours le panier
-    for (let p of panier) {
-        // pour chaque element dans le panier on rajoute l'id selon la quantité
-        for (let i = 0; i < p.quantity; i++) {
-            data.products.push(p.id);
-        }
-    }
-
-    const formEstValide = verifInfos();
-    if (formEstValide == false) {
-        return false;
-    }
-
-    if (panier.length > 0) {
-        createOrder(data);
-    }
-    else {
-        alert("Votre panier est vide. ");
-    }
-}
-
-
-
-function createOrder(data) {
-    fetch(URL_API + '/products/order', {
-        method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    }).then(function (response) {
-        return response.json();
-    }).then(function (data) {
-        panier = [];
-        savePanier(panier);
-        document.location.href = "./confirmation.html?orderId=" + data.orderId;
-    });
 }
 
 let init = () => {
 
-    //partie 1 on affiche les elements de notre panier
+    // on affiche les elements de notre panier
     panier = getPanier();
     sectionElement = document.getElementById("cart__items");
-
     afficherToutMonPanier();
-
-    //partie 2 on gére la création de notre commande 
-    bouttonCommander = document.getElementById('order');
-    // on récpère le formulaire du html
-    form = document.querySelector(".cart__order__form");
-    // lorsque le formulaire est soumi on utilise la fonction getInfos
-    form.setAttribute('onsubmit', "return getInfos(event)");
 }
 
 init();
