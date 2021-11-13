@@ -66,7 +66,7 @@ let afficheCanapeDansPanier = (infosCanape, indexPanier) => {
         const indexToChange = [...sectionElement.children].indexOf(articleElement);
         panier[indexToChange].quantity = parseInt(inputElement.value);
         calculeMonPanier();
-        savePanier();
+        savePanier(panier);
     });
     settingsElement.appendChild(inputElement);
 

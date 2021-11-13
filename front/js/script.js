@@ -1,6 +1,6 @@
 
 
-//afficher les canape dans ma page 
+//afficher les canapes dans ma page 
 let displayAllCanape = (allCanapes) => {
 
     //recuperer l'element html section avec id "items"

@@ -18,7 +18,7 @@ let getParamFromUrl = (param) => {
 let savePanier = (panier) => {
     localStorage.setItem("panier", JSON.stringify(panier));
 }
-
+//recupérer les données du canapé
 let getPanier = () => {
     if (localStorage.getItem("panier")) {
         return JSON.parse(localStorage.getItem("panier"));
@@ -32,7 +32,7 @@ class VerifFormulaire {
     static accent = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ";
 
     static contientUniquementDesLettresEspaces(inputtxt) {
-        let letters = "^[A-Za-z" + this.accent + " ](-*[A-Za-z" + this.accent + " ]*)+$";
+        let letters = "^[A-Za-z" + this.accent + " ](-*[A-Za-z" + this.accent + " ]*)+$";//regex pour valider les donnée
         let lettersRegexp = new RegExp(letters);
         if (inputtxt.match(lettersRegexp)) {
             return true;
